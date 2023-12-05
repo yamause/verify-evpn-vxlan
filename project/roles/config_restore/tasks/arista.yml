@@ -1,6 +1,7 @@
 ---
 - name: Restore Configuration
   arista.eos.eos_config:
-    src: "{{ playbook_dir }}/../nwconfigs/{{ inventory_hostname }}.cfg"
+    # src: "{{ playbook_dir }}/../nwconfigs/{{ inventory_hostname }}.cfg"
+    src: "leaf_temp.j2"
     replace: config
     backup: true

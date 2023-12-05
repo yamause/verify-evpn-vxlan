@@ -1,6 +1,6 @@
 ---
 - name: Restore Configs
-  hosts: all
+  hosts: arista:&leaf
   gather_facts: false
 
   roles:

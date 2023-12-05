@@ -1,5 +1,5 @@
 ! Command: show running-config
-! device: leaf-02 (vEOS-lab, EOS-4.28.2F)
+! device: Leaf-01 (vEOS-lab, EOS-4.28.2F)
 !
 ! boot system flash:/vEOS-lab.swi
 !
@@ -9,7 +9,7 @@ transceiver qsfp default-mode 4x10G
 !
 service routing protocols model multi-agent
 !
-hostname leaf-02
+hostname {{ inventory_hostname }}
 ip domain lookup vrf MANAGEMENT source-interface Management1
 ip name-server vrf MANAGEMENT 10.19.30.254
 ip name-server vrf MANAGEMENT 8.8.8.8 priority 1
@@ -21,9 +21,11 @@ snmp-server vrf MANAGEMENT
 !
 spanning-tree mode mstp
 !
-vlan 100
-   name CLIENT-NETWORK
+{% for i in vlans %}
+vlan {{ i.vid }}
+   name {{ i.name }}
 !
+{% endfor %}
 vrf instance MANAGEMENT
 !
 radius-server host 10.19.11.14 vrf MANAGEMENT key 7 1520040323227C312D1E3A2A420E175614
@@ -50,10 +52,10 @@ interface Port-Channel8
    lacp system-id 5000.0001.0008
 !
 interface Ethernet1
-   description TO:spine-01 Et7
+   description {{ uplink_if.description }}
+   ip address {{uplink_if.address }}
    mtu 9214
    no switchport
-   ip address 10.2.0.3/31
 !
 interface Ethernet2
 !
@@ -76,21 +78,25 @@ interface Ethernet8
 !
 interface Loopback0
    description EVPN
-   ip address 10.0.0.2/32
+   ip address {{ evpn_endpoint }}
 !
 interface Loopback1
    description VXLAN
-   ip address 10.1.0.2/32
+   ip address {{ vxlan_endpoint }}
 !
 interface Management1
    vrf MANAGEMENT
-   ip address 10.19.30.223/24
+   ip address {{ management }}
 !
 interface Vxlan1
    vxlan source-interface Loopback1
    vxlan udp-port 4789
-   vxlan vlan 100 vni 10100
+{% for i in vlans %}
+{% if i.vni %}
+   vxlan vlan {{ i.vid }} vni {{ i.vni }}
 !
+{% endif %}
+{% endfor %}
 ip virtual-router mac-address 00:00:00:00:00:0a
 !
 ip routing
@@ -114,8 +120,8 @@ route-map gracefulshut permit 10
    match as-path myorigin
    set community GSHUT
 !
-router bgp 65002
-   router-id 10.0.0.2
+router bgp {{ asn }}
+   router-id {{ evpn_endpoint | ansible.utils.ipaddr('address') }}
    no bgp default ipv4-unicast
    maximum-paths 32
    neighbor EVPN peer group
@@ -126,16 +132,20 @@ router bgp 65002
    neighbor UNDER peer group
    neighbor UNDER description Underlay Connection
    neighbor UNDER send-community
-   neighbor 10.0.0.0 peer group EVPN
-   neighbor 10.0.0.0 remote-as 65000
-   neighbor 10.2.0.2 peer group UNDER
-   neighbor 10.2.0.2 remote-as 65000
+{% for i in bgp_peer %}
+   neighbor {{ i.neighbor }} peer group {{ i.group }}
+   neighbor {{ i.neighbor }} remote-as {{ i.remote_as }}
    !
-   vlan 100
-      rd 10.0.0.2:100
-      route-target both 100:10100
+{% endfor %}
+{% for i in vlans %}
+{% if i.vni %}
+   vlan {{ i.vid }}
+      rd {{ evpn_endpoint | ansible.utils.ipaddr('address') }}:{{ i.vid }}
+      route-target both {{ i.vid }}:{{ i.vni }}
       redistribute learned
    !
+{% endif %}
+{% endfor %}
    address-family evpn
       neighbor EVPN activate
    !
