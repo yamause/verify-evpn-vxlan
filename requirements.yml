@@ -1,0 +1,6 @@
+---
+collections:
+  - name: netbox.netbox
+  - name: ansible.utils
+  - name: arista.eos
+  - name: junipernetworks.junos

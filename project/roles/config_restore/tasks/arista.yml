@@ -1,0 +1,6 @@
+---
+- name: Restore Configuration
+  arista.eos.eos_config:
+    src: "{{ playbook_dir }}/../nwconfigs/{{ inventory_hostname }}.cfg"
+    replace: config
+    backup: true

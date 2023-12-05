@@ -1,0 +1,8 @@
+---
+- name: Backup Configuration
+  junipernetworks.junos.junos_config:
+    backup: true
+    backup_options:
+      backup_format: text
+      filename: "{{ inventory_hostname }}.cfg"
+      dir_path: nwconfigs

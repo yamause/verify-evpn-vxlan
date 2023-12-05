@@ -1,0 +1,9 @@
+# python
+*venv
+env/
+
+# Ansible runner
+artifacts/*
+
+# custom
+backup/

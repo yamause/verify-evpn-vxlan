@@ -1,0 +1,7 @@
+---
+- name: Restore Configs
+  hosts: all
+  gather_facts: false
+
+  roles:
+    - role: config_restore

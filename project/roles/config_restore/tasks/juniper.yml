@@ -1,0 +1,6 @@
+---
+- name: Restore Configuration
+  junipernetworks.junos.junos_config:
+    src: "{{ playbook_dir }}/../nwconfigs/{{ inventory_hostname }}.cfg"
+    update: override
+    backup: true
