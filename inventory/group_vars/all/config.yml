@@ -1,0 +1,9 @@
+---
+name_server:
+  - host: 10.19.30.254
+  - host: 8.8.8.8
+radius_server:
+  - host: 10.19.11.14
+    secret: "{{ vault_radius_secret }}"
+snmp_server:
+  community: kekekenoke

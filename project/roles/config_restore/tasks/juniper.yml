@@ -1,6 +1,13 @@
 ---
-- name: Restore Configuration
-  junipernetworks.junos.junos_config:
-    src: "{{ playbook_dir }}/../nwconfigs/{{ inventory_hostname }}.cfg"
-    update: override
-    backup: true
+# - name: Restore Configuration
+#   junipernetworks.junos.junos_config:
+#     # src: "{{ playbook_dir }}/../nwconfigs/{{ inventory_hostname }}.cfg"
+#     src: juniper_leaf_temp.j2
+#     update: update
+#     backup: true
+
+- name: Output configuer
+  ansible.builtin.template:
+    src: juniper_leaf_temp.j2
+    dest: "{{ inventory_hostname }}.cfg"
+    mode: "644"

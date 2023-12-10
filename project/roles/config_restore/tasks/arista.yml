@@ -1,7 +1,13 @@
 ---
-- name: Restore Configuration
-  arista.eos.eos_config:
-    # src: "{{ playbook_dir }}/../nwconfigs/{{ inventory_hostname }}.cfg"
-    src: "leaf_temp.j2"
-    replace: config
-    backup: true
+# - name: Restore Configuration
+#   arista.eos.eos_config:
+#     # src: "{{ playbook_dir }}/../nwconfigs/{{ inventory_hostname }}.cfg"
+#     src: "arista_leaf_temp.j2"
+#     replace: config
+#     backup: true
+
+- name: Output configuer
+  ansible.builtin.template:
+    src: arista/leaf.j2
+    dest: "{{ inventory_hostname }}.cfg"
+    mode: "644"

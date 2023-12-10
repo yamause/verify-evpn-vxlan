@@ -1,19 +1,56 @@
 ---
-asn: 65001
+asn: "65001"
 evpn_endpoint: 10.0.0.1/32
 vxlan_endpoint: 10.1.0.1/32
 management: 10.19.30.222/24
-uplink_if:
-  description: TO:spine-01 Et8
-  address: 10.2.0.1/31
 vlans:
-  - vid: 100
-    vni: 10100
-    name: CLIENT-NETWORK
+  - vid: "100"
+    vni: "10100"
+    name: V0100_CLIENT-NETWORK
 bgp_peer:
-  - neighbor: 10.0.0.0
-    remote_as: 65000
+  - neighbor: "10.0.0.0"
+    remote_as: "65000"
     group: EVPN
-  - neighbor: 10.2.0.0
-    remote_as: 65000
+  - neighbor: "10.2.0.0"
+    remote_as: "65000"
     group: UNDER
+
+# interfaces:
+#   - name: Ethernet1
+#     type: esi
+#     identifier:
+
+include_interface_config: >
+  interface Port-Channel8
+    switchport access vlan 100
+    !
+    evpn ethernet-segment
+        identifier 0006:3e55:d635:1d00:0000
+        route-target import 06:3e:55:d6:35:1d
+    port-channel lacp fallback static
+    lacp system-id 5000.0001.0008
+  !
+  interface Ethernet1
+    description TO:spine-01 Et8
+    mtu 9214
+    no switchport
+    ip address 10.2.0.1/31
+  !
+  interface Ethernet2
+  !
+  interface Ethernet3
+  !
+  interface Ethernet4
+  !
+  interface Ethernet5
+  !
+  interface Ethernet6
+  !
+  interface Ethernet7
+  !
+  interface Ethernet8
+    description TO:Ubuntu e1
+    channel-group 8 mode active
+    lacp timer fast
+    spanning-tree portfast
+    spanning-tree bpduguard enable

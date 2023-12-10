@@ -1,0 +1,33 @@
+interface Port-Channel8
+switchport access vlan 100
+!
+evpn ethernet-segment
+    identifier 0006:3e55:d635:1d00:0000
+    route-target import 06:3e:55:d6:35:1d
+port-channel lacp fallback static
+lacp system-id 5000.0001.0008
+!
+interface Ethernet1
+description TO:spine-01 Et8
+mtu 9214
+no switchport
+ip address 10.2.0.1/31
+!
+interface Ethernet2
+!
+interface Ethernet3
+!
+interface Ethernet4
+!
+interface Ethernet5
+!
+interface Ethernet6
+!
+interface Ethernet7
+!
+interface Ethernet8
+description TO:Ubuntu e1
+channel-group 8 mode active
+lacp timer fast
+spanning-tree portfast
+spanning-tree bpduguard enable

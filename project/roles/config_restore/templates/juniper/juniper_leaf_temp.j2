@@ -1,0 +1,201 @@
+## Last changed: 2023-12-05 15:31:29 UTC
+version 23.2R1.14;
+system {
+    host-name {{ inventory_hostname }};
+    root-authentication {
+        encrypted-password "$6$thmbnjfn$Ik9y6ashDuDAv/qriDvkx1L1aW2Y2Q2lGB2ZtnYgsnX6EEUuXGCRKmgh8pJMtml5Dv6mX6WkGiM1WguaR.sKo.";
+    }
+    login {
+        user remote {
+            uid 2000;
+            class super-user;
+        }
+    }
+    services {
+        netconf {
+            ssh;
+        }
+    }
+    arp {
+        aging-timer 5;
+    }
+    management-instance;
+    authentication-order [ radius password ];
+    radius-server {
+{% for i in radius_server %}
+        {{ i.host }} {
+            routing-instance mgmt_junos;
+            secret {{ i.secret }};
+            source-address {{ management | ansible.utils.ipaddr('address') }};
+        }
+{% endfor %}
+    }
+    accounting {
+        events login;
+        destination {
+            radius {
+                server {
+{% for i in radius_server %}
+                    {{ i.host }} {
+                        routing-instance mgmt_junos;
+                        secret {{ i.secret }};
+                    }
+{% endfor %}
+                }
+            }
+        }
+    }
+    syslog {
+        file interactive-commands {
+            interactive-commands any;
+        }
+        file messages {
+            any notice;
+            authorization info;
+        }
+    }
+    processes {
+        dhcp-service {
+            traceoptions {
+                file dhcp_logfile size 10m;
+                level all;
+                flag packet;
+            }
+        }
+    }
+}
+chassis {
+    aggregated-devices {
+        ethernet {
+            device-count 8;
+        }
+    }
+}
+interfaces {
+{{ include_interface_config }}
+    fxp0 {
+        unit 0 {
+            family inet {
+                address {{ management }};
+            }
+        }
+    }
+    lo0 {
+        unit 0 {
+            family inet {
+                address {{ evpn_endpoint }};
+            }
+        }
+    }
+}
+multi-chassis {
+    mc-lag {
+        consistency-check;
+    }
+}
+policy-options {
+    policy-statement ADV-LO {
+        from {
+            protocol direct;
+            interface lo0.0;
+        }
+        then accept;
+    }
+}
+routing-instances {
+{% for i in vlans %}
+{% if i.vni %}
+    {{ i.name }} {
+        instance-type mac-vrf;
+        protocols {
+            evpn {
+                encapsulation vxlan;
+                default-gateway no-gateway-community;
+                extended-vni-list {{ i.vni }};
+            }
+        }
+        description {{ i.name }};
+        vtep-source-interface lo0.0;
+        service-type vlan-based;
+        interface ae0.0;
+        route-distinguisher {{ evpn_endpoint | ansible.utils.ipaddr('address') }}:{{ i.vid }};
+        vrf-target target:{{ i.vid }}:{{ i.vni }};
+{% endif %}
+{% endfor %}
+        vlans {
+{% for i in vlans %}
+            {{ i.name }} {
+                vlan-id {{ i.vid }};
+{% if i.vni %}
+                vxlan {
+                    vni {{ i.vni }};
+                }
+{% endif %}
+            }
+{% endfor %}
+        }
+    }
+    mgmt_junos {
+        routing-options {
+            static {
+                route 0.0.0.0/0 next-hop 10.19.30.254;
+            }
+        }
+        description Management;
+    }
+}
+routing-options {
+    router-id {{ evpn_endpoint | ansible.utils.ipaddr('address') }};
+    autonomous-system {{ asn }};
+}
+protocols {
+    router-advertisement {
+        interface fxp0.0 {
+            managed-configuration;
+        }
+        interface ge-0/0/0.0;
+    }
+    bgp {
+        group EVPN {
+            type external;
+            multihop {
+                ttl 2;
+            }
+            local-address {{ evpn_endpoint | ansible.utils.ipaddr('address') }};
+            family evpn {
+                signaling;
+            }
+            multipath;
+{% for i in bgp_peer %}
+{% if i.group == "EVPN" %}
+            neighbor {{ i.neighbor }} {
+                peer-as {{ i.remote_as }};
+            }
+{% endif %}
+{% endfor %}
+        }
+        group UNDER {
+            type external;
+            family inet {
+                unicast;
+            }
+            export ADV-LO;
+            multipath;
+{% for i in bgp_peer %}
+{% if i.group == "UNDER" %}
+            neighbor {{ i.neighbor }} {
+                peer-as {{ i.remote_as }};
+            }
+{% endif %}
+{% endfor %}
+        }
+    }
+    lldp {
+        interface all;
+    }
+    lldp-med {
+        interface all;
+    }
+}
+aaaaa
+{% include "test.j2" %}
