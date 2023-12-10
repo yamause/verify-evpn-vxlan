@@ -61,11 +61,18 @@ route-map gracefulshut permit 10
    match as-path myorigin
    set community GSHUT
 !
+peer-filter EVPN-PF
+   description "Underlay Peering for EVPN/VXLAN"
+   10 match as-range 65101-65110 result accept
+!
 router bgp {{ asn }}
    router-id {{ evpn_endpoint | ansible.utils.ipaddr('address') }}
    no bgp default ipv4-unicast
    maximum-paths 32
+   bgp listen range 10.0.0.0/29 peer-group EVPN peer-filter EVPN-PF
+   bgp listen range 10.2.0.0/29 peer-group UNDER peer-filter EVPN-PF
    neighbor EVPN peer group
+   neighbor EVPN next-hop-unchanged
    neighbor EVPN update-source Loopback0
    neighbor EVPN description EVPN
    neighbor EVPN ebgp-multihop 2

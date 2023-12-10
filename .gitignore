@@ -2,6 +2,9 @@
 *venv
 env/
 
+# Ansible
+vault
+
 # Ansible runner
 artifacts/*
 

@@ -1,13 +1,20 @@
 ---
-# - name: Restore Configuration
-#   arista.eos.eos_config:
-#     # src: "{{ playbook_dir }}/../nwconfigs/{{ inventory_hostname }}.cfg"
-#     src: "arista_leaf_temp.j2"
-#     replace: config
-#     backup: true
+- name: Restore leaf Configuration
+  arista.eos.eos_config:
+    src: "arista/leaf.j2"
+    replace: config
+    backup: true
+  when: "'leaf' in group_names"
 
-- name: Output configuer
-  ansible.builtin.template:
-    src: arista/leaf.j2
-    dest: "{{ inventory_hostname }}.cfg"
-    mode: "644"
+- name: Restore spine Configuration
+  arista.eos.eos_config:
+    src: "arista/spine.j2"
+    replace: config
+    backup: true
+  when: "'spine' in group_names"
+
+# - name: Output configuer
+#   ansible.builtin.template:
+#     src: arista/leaf.j2
+#     dest: "{{ inventory_hostname }}.cfg"
+#     mode: "644"

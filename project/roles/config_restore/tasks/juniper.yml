@@ -1,13 +1,13 @@
 ---
-# - name: Restore Configuration
-#   junipernetworks.junos.junos_config:
-#     # src: "{{ playbook_dir }}/../nwconfigs/{{ inventory_hostname }}.cfg"
-#     src: juniper_leaf_temp.j2
-#     update: update
-#     backup: true
+- name: Restore leaf Configuration
+  junipernetworks.junos.junos_config:
+    src: juniper/leaf.j2
+    update: update
+    backup: true
+  when: "'leaf' in group_names"
 
-- name: Output configuer
-  ansible.builtin.template:
-    src: juniper_leaf_temp.j2
-    dest: "{{ inventory_hostname }}.cfg"
-    mode: "644"
+# - name: Output configuer
+#   ansible.builtin.template:
+#     src: juniper_leaf_temp.j2
+#     dest: "{{ inventory_hostname }}.cfg"
+#     mode: "644"

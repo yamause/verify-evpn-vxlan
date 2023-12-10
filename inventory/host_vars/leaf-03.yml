@@ -1,11 +1,11 @@
 ---
-asn: "65003"
+asn: "65103"
 evpn_endpoint: 10.0.0.3/32
 management: 10.19.30.224/24
 vlans:
   - vid: "100"
     vni: "10100"
-    name: V0100_CLIENT-NETWORK
+    name: V0100_CUSTOMER
 bgp_peer:
   - neighbor: "10.0.0.0"
     remote_as: "65000"
@@ -26,13 +26,13 @@ include_interface_config: >
         }
     }
     ge-0/0/9 {
-        description TO:Client;
+        description TO:Customer;
         ether-options {
             802.3ad ae0;
         }
     }
     ae0 {
-        description "TO:Client Po1";
+        description "TO:Customer";
         flexible-vlan-tagging;
         encapsulation extended-vlan-bridge;
         esi {
@@ -49,7 +49,7 @@ include_interface_config: >
             family ethernet-switching {
                 interface-mode trunk;
                 vlan {
-                    members V0100_CLIENT-NETWORK;
+                    members V0100_CUSTOMER;
                 }
             }
         }

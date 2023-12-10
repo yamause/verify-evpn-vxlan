@@ -2,7 +2,7 @@
 asn: 65000
 evpn_endpoint: 10.0.0.0/32
 management: 10.19.30.221/24
-include_interface_config: >
+include_interface_config: |
   interface Ethernet1
   !
   interface Ethernet2
@@ -14,7 +14,7 @@ include_interface_config: >
   interface Ethernet5
   !
   interface Ethernet6
-    description TO:leaf-03
+    description TO:leaf-03 ge-0/0/0
     mtu 9214
     no switchport
     ip address 10.2.0.4/31
