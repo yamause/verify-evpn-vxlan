@@ -10,3 +10,5 @@ artifacts/*
 
 # custom
 backup/
+test*
+.cache

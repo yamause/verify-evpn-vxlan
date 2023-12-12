@@ -1,0 +1,2 @@
+---
+config_restore_src: "{{ vender }}/{{ role }}/main.j2"

@@ -1,0 +1,36 @@
+{% for i in vlans %}
+{% if i.vni %}
+    {{ i.name }} {
+        instance-type mac-vrf;
+        protocols {
+            evpn {
+                encapsulation vxlan;
+                default-gateway no-gateway-community;
+                extended-vni-list {{ i.vni }};
+            }
+        }
+        description {{ i.name }};
+        vtep-source-interface lo0.0;
+        service-type vlan-based;
+{% for interface in interfaces | selectattr('esi', 'defined') %}
+{% if i.vid in interface.allowed_vlan %}
+        interface {{ interface.name }};
+{% endif %}
+{% endfor %}
+        route-distinguisher {{ evpn_endpoint | ansible.utils.ipaddr('address') }}:{{ i.vid }};
+        vrf-target target:{{ i.vid }}:{{ i.vni }};
+{% endif %}
+{% endfor %}
+        vlans {
+{% for i in vlans %}
+            {{ i.name }} {
+                vlan-id {{ i.vid }};
+{% if i.vni %}
+                vxlan {
+                    vni {{ i.vni }};
+                }
+{% endif %}
+            }
+{% endfor %}
+        }
+    }

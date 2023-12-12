@@ -1,0 +1,36 @@
+{% if 'ge-' in i.name %}
+    {{ i.name }} {
+        description "TO:Customer";
+{% if 'aggrigate' in i %}
+        ether-options {
+            802.3ad ae{{ i.aggrigate }};
+        }
+{% endif %}
+    }
+{% endif %}
+{% if 'ae' in i.name %}
+{% set esi_num = i.esi | replace(':', '') %}
+    {{ i.name }} {
+        description "TO:Customer";
+        flexible-vlan-tagging;
+        encapsulation extended-vlan-bridge;
+        esi {
+            {{ esi_num | slice(10) | map('join', '') | join(':') }};
+            all-active;
+        }
+        aggregated-ether-options {
+            lacp {
+                active;
+                system-id {{ esi_num[-12:] | slice(6) | map('join', '') | join(':') }};
+            }
+        }
+        unit 0 {
+            family ethernet-switching {
+                interface-mode trunk;
+                vlan {
+                    members [ {{ i.allowed_vlan | join(' ') }} ];
+                }
+            }
+        }
+    }
+{% endif %}

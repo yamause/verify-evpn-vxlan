@@ -1,20 +1,6 @@
 ---
-- name: Restore leaf Configuration
+- name: Restore Configuration
   arista.eos.eos_config:
-    src: "arista/leaf.j2"
+    src: "{{ config_restore_src }}"
     replace: config
     backup: true
-  when: "'leaf' in group_names"
-
-- name: Restore spine Configuration
-  arista.eos.eos_config:
-    src: "arista/spine.j2"
-    replace: config
-    backup: true
-  when: "'spine' in group_names"
-
-# - name: Output configuer
-#   ansible.builtin.template:
-#     src: arista/leaf.j2
-#     dest: "{{ inventory_hostname }}.cfg"
-#     mode: "644"

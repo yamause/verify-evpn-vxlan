@@ -3,9 +3,9 @@ asn: "65103"
 evpn_endpoint: 10.0.0.3/32
 management: 10.19.30.224/24
 vlans:
-  - vid: "100"
-    vni: "10100"
-    name: V0100_CUSTOMER
+  - vid: "10"
+    vni: "10010"
+    name: V0010_CUSTOMER
 bgp_peer:
   - neighbor: "10.0.0.0"
     remote_as: "65000"
@@ -14,43 +14,14 @@ bgp_peer:
     remote_as: "65000"
     group: UNDER
 
-include_interface_config: >
-    ge-0/0/0 {
-        description "TO:spine-01 Et6";
-        mtu 9192;
-        unit 0 {
-            family inet {
-                mtu 9178;
-                address 10.2.0.5/31;
-            }
-        }
-    }
-    ge-0/0/9 {
-        description TO:Customer;
-        ether-options {
-            802.3ad ae0;
-        }
-    }
-    ae0 {
-        description "TO:Customer";
-        flexible-vlan-tagging;
-        encapsulation extended-vlan-bridge;
-        esi {
-            00:50:00:00:15:4f:e8:00:00:00;
-            all-active;
-        }
-        aggregated-ether-options {
-            lacp {
-                active;
-                system-id 06:3e:55:d6:35:1d;
-            }
-        }
-        unit 0 {
-            family ethernet-switching {
-                interface-mode trunk;
-                vlan {
-                    members V0100_CUSTOMER;
-                }
-            }
-        }
-    }
+interfaces:
+  - name: ge-0/0/0
+    template: to_spine.j2
+    address: 10.2.0.5/31
+  - name: ge-0/0/9
+    template: to_customer.j2
+    aggrigate: "0"
+  - name: ae0
+    template: to_customer.j2
+    esi: 0022:2222:2222:2200:0000
+    allowed_vlan: ["10"]
