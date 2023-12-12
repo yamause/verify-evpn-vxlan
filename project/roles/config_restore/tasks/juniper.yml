@@ -1,13 +1,6 @@
 ---
-- name: Restore leaf Configuration
+- name: Restore Configuration
   junipernetworks.junos.junos_config:
-    src: juniper/leaf.j2
+    src: "{{ config_restore_src }}"
     update: update
     backup: true
-  when: "'leaf' in group_names"
-
-# - name: Output configuer
-#   ansible.builtin.template:
-#     src: juniper_leaf_temp.j2
-#     dest: "{{ inventory_hostname }}.cfg"
-#     mode: "644"

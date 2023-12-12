@@ -1,0 +1,22 @@
+interface {{ i.name }}
+   description TO:Customer
+{% if 'Ethernet' in i.name %}
+{% if 'aggrigate' in i %}
+   channel-group {{ i.aggrigate }} mode active
+{% endif %}
+   lacp timer fast
+   spanning-tree portfast
+   spanning-tree bpduguard enable
+{% endif %}
+{% if 'Port-Channel' in i.name %}
+{% set esi_num = i.esi | replace(':', '') %}
+    switchport mode trunk
+    switchport trunk allowed vlan {{ i.allowed_vlan | join(',') }}
+    !
+    evpn ethernet-segment
+        identifier {{ esi_num | slice(5) | map('join', '') | join(':') }}
+        route-target import {{ esi_num[2:14] | slice(6) | map('join', '') | join(':') }}
+    port-channel lacp fallback static
+    lacp system-id {{ esi_num[-12:] | slice(3) | map('join', '') | join('.') }}
+{% endif %}
+!

@@ -18,6 +18,11 @@ snmp-server vrf MANAGEMENT
 !
 spanning-tree mode mstp
 !
+{% for i in vlans %}
+vlan {{ i.vid }}
+   name {{ i.name }}
+!
+{% endfor %}
 vrf instance MANAGEMENT
 !
 {% for i in radius_server %}
@@ -34,15 +39,31 @@ aaa authentication enable default group RAD-GROUP local
 aaa authorization serial-console
 aaa authorization exec default group RAD-GROUP local
 !
-{{ include_interface_config }}
-!
+{% for i in interfaces %}
+{% include 'interfaces/' + i.template | default('default.j2') %}
+
+{% endfor %}
 interface Loopback0
    description EVPN
    ip address {{ evpn_endpoint }}
 !
+interface Loopback1
+   description VXLAN
+   ip address {{ vxlan_endpoint }}
+!
 interface Management1
    vrf MANAGEMENT
    ip address {{ management }}
+!
+interface Vxlan1
+   vxlan source-interface Loopback1
+   vxlan udp-port 4789
+{% for i in vlans %}
+{% if i.vni %}
+   vxlan vlan {{ i.vid }} vni {{ i.vni }}
+!
+{% endif %}
+{% endfor %}
 !
 ip routing
 no ip routing vrf MANAGEMENT
@@ -57,36 +78,16 @@ route-map ADV-LO permit 10
    description EVPN Interface
    match interface Loopback0
 !
+route-map ADV-LO permit 20
+   description VXLAN Interface
+   match interface Loopback1
+!
 route-map gracefulshut permit 10
    match as-path myorigin
    set community GSHUT
 !
-peer-filter EVPN-PF
-   description "Underlay Peering for EVPN/VXLAN"
-   10 match as-range 65101-65110 result accept
-!
-router bgp {{ asn }}
-   router-id {{ evpn_endpoint | ansible.utils.ipaddr('address') }}
-   no bgp default ipv4-unicast
-   maximum-paths 32
-   bgp listen range 10.0.0.0/29 peer-group EVPN peer-filter EVPN-PF
-   bgp listen range 10.2.0.0/29 peer-group UNDER peer-filter EVPN-PF
-   neighbor EVPN peer group
-   neighbor EVPN next-hop-unchanged
-   neighbor EVPN update-source Loopback0
-   neighbor EVPN description EVPN
-   neighbor EVPN ebgp-multihop 2
-   neighbor EVPN send-community
-   neighbor UNDER peer group
-   neighbor UNDER description Underlay Connection
-   !
-   address-family evpn
-      neighbor EVPN activate
-   !
-   address-family ipv4
-      neighbor UNDER activate
-      redistribute connected route-map ADV-LO
-!
+{% include 'bgp.j2' %}
+
 management ssh
    vrf MANAGEMENT
       no shutdown

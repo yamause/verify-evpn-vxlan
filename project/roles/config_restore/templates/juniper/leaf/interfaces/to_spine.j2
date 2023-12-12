@@ -1,0 +1,10 @@
+    {{ i.name }} {
+        description "TO:spine";
+        mtu 9192;
+        unit 0 {
+            family inet {
+                mtu 9178;
+                address {{ i.address }};
+            }
+        }
+    }

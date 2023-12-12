@@ -1,5 +1,3 @@
-## Last changed: 2023-12-05 15:31:29 UTC
-version 23.2R1.14;
 system {
     host-name {{ inventory_hostname }};
     root-authentication {
@@ -72,7 +70,10 @@ chassis {
     }
 }
 interfaces {
-{{ include_interface_config }}
+{% for i in interfaces %}
+{% include 'interfaces/' + i.template %}
+
+{% endfor %}
     fxp0 {
         unit 0 {
             family inet {
@@ -103,38 +104,8 @@ policy-options {
     }
 }
 routing-instances {
-{% for i in vlans %}
-{% if i.vni %}
-    {{ i.name }} {
-        instance-type mac-vrf;
-        protocols {
-            evpn {
-                encapsulation vxlan;
-                default-gateway no-gateway-community;
-                extended-vni-list {{ i.vni }};
-            }
-        }
-        description {{ i.name }};
-        vtep-source-interface lo0.0;
-        service-type vlan-based;
-        interface ae0.0;
-        route-distinguisher {{ evpn_endpoint | ansible.utils.ipaddr('address') }}:{{ i.vid }};
-        vrf-target target:{{ i.vid }}:{{ i.vni }};
-{% endif %}
-{% endfor %}
-        vlans {
-{% for i in vlans %}
-            {{ i.name }} {
-                vlan-id {{ i.vid }};
-{% if i.vni %}
-                vxlan {
-                    vni {{ i.vni }};
-                }
-{% endif %}
-            }
-{% endfor %}
-        }
-    }
+{% include 'mac_vrf.j2' %}
+
     mgmt_junos {
         routing-options {
             static {
@@ -155,41 +126,8 @@ protocols {
         }
         interface ge-0/0/0.0;
     }
-    bgp {
-        group EVPN {
-            type external;
-            multihop {
-                ttl 2;
-            }
-            local-address {{ evpn_endpoint | ansible.utils.ipaddr('address') }};
-            family evpn {
-                signaling;
-            }
-            multipath;
-{% for i in bgp_peer %}
-{% if i.group == "EVPN" %}
-            neighbor {{ i.neighbor }} {
-                peer-as {{ i.remote_as }};
-            }
-{% endif %}
-{% endfor %}
-        }
-        group UNDER {
-            type external;
-            family inet {
-                unicast;
-            }
-            export ADV-LO;
-            multipath;
-{% for i in bgp_peer %}
-{% if i.group == "UNDER" %}
-            neighbor {{ i.neighbor }} {
-                peer-as {{ i.remote_as }};
-            }
-{% endif %}
-{% endfor %}
-        }
-    }
+{% include 'bgp.j2' %}
+
     lldp {
         interface all;
     }

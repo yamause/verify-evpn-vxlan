@@ -1,0 +1,35 @@
+    bgp {
+        group EVPN {
+            type external;
+            multihop {
+                ttl 2;
+            }
+            local-address {{ evpn_endpoint | ansible.utils.ipaddr('address') }};
+            family evpn {
+                signaling;
+            }
+            multipath;
+{% for i in bgp_peer %}
+{% if i.group == "EVPN" %}
+            neighbor {{ i.neighbor }} {
+                peer-as {{ i.remote_as }};
+            }
+{% endif %}
+{% endfor %}
+        }
+        group UNDER {
+            type external;
+            family inet {
+                unicast;
+            }
+            export ADV-LO;
+            multipath;
+{% for i in bgp_peer %}
+{% if i.group == "UNDER" %}
+            neighbor {{ i.neighbor }} {
+                peer-as {{ i.remote_as }};
+            }
+{% endif %}
+{% endfor %}
+        }
+    }

@@ -1,8 +1,8 @@
 ---
 - name: Restore Configs
-  # hosts: arista:&leaf
   hosts: all
   gather_facts: false
 
   roles:
     - role: config_restore
+    - role: config_backup

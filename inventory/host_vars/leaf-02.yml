@@ -3,10 +3,12 @@ asn: "65102"
 evpn_endpoint: 10.0.0.2/32
 vxlan_endpoint: 10.1.0.2/32
 management: 10.19.30.223/24
+
 vlans:
-  - vid: "100"
-    vni: "10100"
-    name: V0100_CUSTOMER
+  - vid: "10"
+    vni: "10010"
+    name: V0010_CUSTOMER
+
 bgp_peer:
   - neighbor: "10.0.0.0"
     remote_as: "65000"
@@ -15,40 +17,20 @@ bgp_peer:
     remote_as: "65000"
     group: UNDER
 
-include_interface_config: |
-  !
-  interface Port-Channel8
-    description TO:Ubuntu
-    switchport access vlan 100
-    !
-    evpn ethernet-segment
-        identifier 0006:3e55:d635:1d00:0000
-        route-target import 06:3e:55:d6:35:1d
-    port-channel lacp fallback static
-    lacp system-id 5000.0001.0008
-  !
-  interface Ethernet1
-    description TO:spine-01 Et8
-    mtu 9214
-    no switchport
-    ip address 10.2.0.3/31
-  !
-  interface Ethernet2
-  !
-  interface Ethernet3
-  !
-  interface Ethernet4
-  !
-  interface Ethernet5
-  !
-  interface Ethernet6
-  !
-  interface Ethernet7
-  !
-  interface Ethernet8
-    description TO:Ubuntu e1
-    channel-group 8 mode active
-    lacp timer fast
-    spanning-tree portfast
-    spanning-tree bpduguard enable
-  !
+interfaces:
+  - name: Ethernet1
+    template: to_spine.j2
+    address: 10.2.0.3/31
+  - name: Ethernet2
+  - name: Ethernet3
+  - name: Ethernet4
+  - name: Ethernet5
+  - name: Ethernet6
+  - name: Ethernet7
+  - name: Ethernet8
+    template: to_customer.j2
+    aggrigate: 8
+  - name: Port-Channel8
+    template: to_customer.j2
+    esi: 0011:1111:1111:1100:0000
+    allowed_vlan: [10]
