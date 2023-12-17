@@ -5,8 +5,8 @@
 
 - name: Routing to arista
   ansible.builtin.include_tasks: arista.yml
-  when: ansible_network_os == "arista.eos.eos"
+  when: ansible_network_os | default(omit) == "arista.eos.eos"
 
 - name: Routing to juniper
   ansible.builtin.include_tasks: juniper.yml
-  when: ansible_network_os == "junipernetworks.junos.junos"
+  when: ansible_network_os | default(omit) == "junipernetworks.junos.junos"
