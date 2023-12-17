@@ -32,6 +32,12 @@ ansible-playbook project/restore.yml --ask-vault-password
 ESIの10バイトの内、後方から数えて6バイトの値  
 ESIが `00:11:22:33:44:55:66:77:88:99` の場合、SystemIDは `44:55:66:77:88:99` とする  
 
+### LACP System Priority
+
+マルチベンダ接続のため、LACP System priority を一致させる必要がある  
+SONiCのデフォルト値にあわせ、 `65535` とする  
+
+
 ### ES import route-target
 
 ESIの10バイトの内、先頭の1バイト（ESI Type）をのぞいた9バイトの内、先頭から6バイトの値  
@@ -47,6 +53,7 @@ Overlay
 | leaf-01 | 10.0.0.1 | 10.1.0.1 | 65101 |
 | leaf-02 | 10.0.0.2 | 10.1.0.2 | 65102 |
 | leaf-03 | 10.0.0.3 | 10.0.0.3 | 65103 |
+| leaf-04 | 10.0.0.4 | 10.1.0.4 | 65104 |
 
 Underlay
 
@@ -55,6 +62,7 @@ Underlay
 | leaf-01 Et1 | 10.2.0.1/31 | 10.2.0.0/31 | spine-01 Et8 |
 | leaf-02 Et1 | 10.2.0.3/31 | 10.2.0.2/31 | spine-01 Et7 |
 | leaf-03 ge-0/0/0 | 10.2.0.5/31 | 10.2.0.4/31 | spine-01 Et6 |
+| leaf-04 Et0 | 10.2.0.7/31 | 10.2.0.6/31 | spine-01 Et5 |
 
 Customer
 

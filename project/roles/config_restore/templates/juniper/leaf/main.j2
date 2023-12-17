@@ -66,8 +66,12 @@ chassis {
     aggregated-devices {
         ethernet {
             device-count 8;
+            lacp {
+                system-priority 65535;
+            }
         }
-    }
+}
+
 }
 interfaces {
 {% for i in interfaces %}

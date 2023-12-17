@@ -1,0 +1,7 @@
+---
+- name: Backup Configuration
+  ansible.builtin.fetch:
+    src: /etc/sonic/config_db.json
+    dest: "../nwconfigs/{{ inventory_hostname }}.cfg"
+    flat: true
+  become: true

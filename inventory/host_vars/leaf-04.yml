@@ -1,0 +1,37 @@
+---
+asn: "65104"
+evpn_endpoint: 10.0.0.4/32
+vxlan_endpoint: 10.1.0.4/32
+management: 10.19.30.225/24
+
+vlans:
+  - vid: "10"
+    vni: "10010"
+    name: V0010_CUSTOMER
+
+bgp_peer:
+  - neighbor: "10.0.0.0"
+    remote_as: "65000"
+    group: EVPN
+  - neighbor: "10.2.0.6"
+    remote_as: "65000"
+    group: UNDER
+
+interfaces:
+  - name: Ethernet0
+    template: to_spine.j2
+    address: 10.2.0.7/31
+  - name: Ethernet1
+  - name: Ethernet2
+  - name: Ethernet3
+  - name: Ethernet4
+  - name: Ethernet5
+  - name: Ethernet6
+  - name: Ethernet7
+  - name: Ethernet8
+    template: to_customer.j2
+    aggrigate: "8"
+  - name: PortChannel8
+    template: to_customer.j2
+    esi: 0022:2222:2222:2200:0000
+    allowed_vlan: ["10"]
