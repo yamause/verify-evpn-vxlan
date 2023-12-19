@@ -1,0 +1,13 @@
+---
+- name: Restore Configuration
+  ansible.builtin.template:
+    src: "{{ config_restore_src }}"
+    dest: /etc/sonic/config_db.json
+    mode: "0600"
+  register: result
+  become: true
+
+- name: Reload Config
+  ansible.builtin.command: config reload -y
+  become: true
+  when: result.changed

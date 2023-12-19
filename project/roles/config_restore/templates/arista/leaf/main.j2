@@ -5,6 +5,8 @@ transceiver qsfp default-mode 4x10G
 !
 service routing protocols model multi-agent
 !
+lacp system-priority 65535
+!
 hostname {{ inventory_hostname }}
 ip domain lookup vrf MANAGEMENT source-interface Management1
 {% for i in name_server %}

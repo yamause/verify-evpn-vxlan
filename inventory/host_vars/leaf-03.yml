@@ -2,10 +2,12 @@
 asn: "65103"
 evpn_endpoint: 10.0.0.3/32
 management: 10.19.30.224/24
+
 vlans:
   - vid: "10"
     vni: "10010"
     name: V0010_CUSTOMER
+
 bgp_peer:
   - neighbor: "10.0.0.0"
     remote_as: "65000"
@@ -20,8 +22,8 @@ interfaces:
     address: 10.2.0.5/31
   - name: ge-0/0/9
     template: to_customer.j2
-    aggrigate: "0"
-  - name: ae0
+    aggrigate: "7"
+  - name: ae7
     template: to_customer.j2
     esi: 0022:2222:2222:2200:0000
     allowed_vlan: ["10"]

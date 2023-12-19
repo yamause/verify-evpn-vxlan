@@ -9,6 +9,8 @@ interfaces:
   - name: Ethernet3
   - name: Ethernet4
   - name: Ethernet5
+    template: to_leaf.j2
+    address: 10.2.0.6/31
   - name: Ethernet6
     template: to_leaf.j2
     address: 10.2.0.4/31
